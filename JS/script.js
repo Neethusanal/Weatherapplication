@@ -55,7 +55,7 @@ function updateUI(data) {
     if (weather.includes("rain")) icon = "rain.png";
     else if (weather.includes("clear")) icon = "clear.png";
     else if (weather.includes("snow")) icon = "snow.png";
-    else if (weather.includes("cloud")) icon = "cloud.png";
+    else if (weather.includes("cloud")) icon = "clouds.png";
     else if (weather.includes("storm")) icon = "storm.png";
 
     weatherIcon.src = `images/${icon}`;
