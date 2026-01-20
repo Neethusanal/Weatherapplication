@@ -1,10 +1,8 @@
-// JS/Script.js
 
-// -------------------- API CONFIG --------------------
 const apiKey = "d3191b5c4df3607337477078d93a9e70";
 const apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
 
-// -------------------- DOM ELEMENTS --------------------
+
 const searchInput = document.querySelector(".search input");
 const searchBtn = document.querySelector(".search button");
 const weatherCard = document.querySelector(".weather");
@@ -15,7 +13,6 @@ const cityEl = document.querySelector(".city");
 const humidityEl = document.querySelector(".humidity");
 const windEl = document.querySelector(".wind");
 
-// -------------------- LOADING STATE --------------------
 function showLoading() {
     tempEl.textContent = "Loading...";
     weatherIcon.style.display = "none";
@@ -51,12 +48,14 @@ function updateUI(data) {
     windEl.textContent = `${Math.round(data.wind.speed)} km/hr`;
 
     const weather = data.weather[0].main.toLowerCase();
-    let icon = "cloud.png"; // default icon
+    let icon = "clear.png"; 
     if (weather.includes("rain")) icon = "rain.png";
     else if (weather.includes("clear")) icon = "clear.png";
     else if (weather.includes("snow")) icon = "snow.png";
     else if (weather.includes("cloud")) icon = "clouds.png";
     else if (weather.includes("storm")) icon = "storm.png";
+    else if (weather.includes("mist")) icon = "mist.png";
+    else if (weather.includes("drizzle")) icon = "drizzle.png";
 
     weatherIcon.src = `images/${icon}`;
     weatherIcon.style.display = "block";
