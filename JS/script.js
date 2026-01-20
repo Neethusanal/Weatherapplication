@@ -1,53 +1,92 @@
-const apiKey="d3191b5c4df3607337477078d93a9e70";
+// JS/Script.js
+
+// -------------------- API CONFIG --------------------
+const apiKey = "d3191b5c4df3607337477078d93a9e70";
 const apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
 
-const searchBox=document.querySelector(".search input")
-const searchBtn=document.querySelector(".search button")
-const weatherIcon=document.querySelector(".weather-icon")
+// -------------------- DOM ELEMENTS --------------------
+const searchInput = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherCard = document.querySelector(".weather");
+const errorMsg = document.querySelector(".error p");
+const weatherIcon = document.querySelector(".weather-icon");
+const tempEl = document.querySelector(".temp");
+const cityEl = document.querySelector(".city");
+const humidityEl = document.querySelector(".humidity");
+const windEl = document.querySelector(".wind");
 
-async function checkWeather(city) {
-     const response=await  fetch (apiUrl + city + `&units=metric&appid=${apiKey}`);
-      if(response.cod===404)
-     {
-        document.querySelector(".error").style.display="block";
-         document.querySelector(".weather").style.display="none" ;
-     }
-     else
-     {
-        var data= await response.json();
-     console.log(data,"data from api")
-    
-      document.querySelector(".city").innerHTML=data.name;
-  document.querySelector(".temp").innerHTML=Math.round(data.main.temp)+"°C";
-  
-  document.querySelector(".humidity").innerHTML=data.main.humidity+"%";
-   document.querySelector(".wind").innerHTML=data.wind.speed+" km/hr";
-
-   if (data.weather[0].main=="Clouds")
-   {
-    weatherIcon.src="images/clouds.png"
-   }
-   else if(data.weather[0].main=="Clear"){
-    weatherIcon.src="images/clear.png"
-   }else if(data.weather[0].main=="Rain"){
-      weatherIcon.src="images/rain.png"
-   }
-    else if(data.weather[0].main=="Drizzle"){
-    weatherIcon.src="images/drizzle.png"
-   }else if(data.weather[0].main=="Mist"){
-weatherIcon.src="images/mist.png"
-   }
-
-   document.querySelector(".weather").style.display="block" ;
-    document.querySelector(".error").style.display="none";
+// -------------------- LOADING STATE --------------------
+function showLoading() {
+    tempEl.textContent = "Loading...";
+    weatherIcon.style.display = "none";
+    errorMsg.style.display = "none";
+    weatherCard.style.display = "block";
+}
 
 
-     }
-     
-   
-} 
-searchBtn.addEventListener("click",()=>{
-checkWeather(searchBox.value);
-})
- 
+async function getWeather(city) {
+    showLoading();
+    try {
+        const response = await fetch(`${apiUrl}${city}&units=metric&appid=${apiKey}`);
+        if (!response.ok) throw new Error("City not found");
 
+        const data = await response.json();
+        updateUI(data);
+
+        // Save user preference
+        localStorage.setItem("lastCity", city);
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+
+function updateUI(data) {
+    weatherCard.style.display = "block";
+    errorMsg.style.display = "none";
+
+    tempEl.textContent = `${Math.round(data.main.temp)}°C`;
+    cityEl.textContent = data.name;
+    humidityEl.textContent = `${data.main.humidity}%`;
+    windEl.textContent = `${Math.round(data.wind.speed)} km/hr`;
+
+    const weather = data.weather[0].main.toLowerCase();
+    let icon = "cloud.png"; // default icon
+    if (weather.includes("rain")) icon = "rain.png";
+    else if (weather.includes("clear")) icon = "clear.png";
+    else if (weather.includes("snow")) icon = "snow.png";
+    else if (weather.includes("cloud")) icon = "cloud.png";
+    else if (weather.includes("storm")) icon = "storm.png";
+
+    weatherIcon.src = `images/${icon}`;
+    weatherIcon.style.display = "block";
+}
+
+
+function showError(message) {
+    weatherCard.style.display = "none";
+    errorMsg.style.display = "block";
+    errorMsg.textContent = message;
+}
+
+
+searchBtn.addEventListener("click", () => {
+    const city = searchInput.value.trim();
+    if (city) getWeather(city);
+});
+
+searchInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const city = searchInput.value.trim();
+        if (city) getWeather(city);
+    }
+});
+
+
+window.addEventListener("load", () => {
+    const lastCity = localStorage.getItem("lastCity");
+    if (lastCity) {
+        getWeather(lastCity);
+        searchInput.value = lastCity;
+    }
+});
