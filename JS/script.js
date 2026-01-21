@@ -25,9 +25,11 @@ async function getWeather(city) {
     showLoading();
     try {
         const response = await fetch(`${apiUrl}${city}&units=metric&appid=${apiKey}`);
+        
         if (!response.ok) throw new Error("City not found");
 
         const data = await response.json();
+        console.log(data,"data from api")
         updateUI(data);
 
         // Save user preference
@@ -52,7 +54,7 @@ function updateUI(data) {
     if (weather.includes("rain")) icon = "rain.png";
     else if (weather.includes("clear")) icon = "clear.png";
     else if (weather.includes("snow")) icon = "snow.png";
-    else if (weather.includes("cloud")) icon = "cloud.png";
+    else if (weather.includes("clouds")) icon = "cloud.png";
     else if (weather.includes("storm")) icon = "storm.png";
     else if (weather.includes("mist")) icon = "mist.png";
     else if (weather.includes("drizzle")) icon = "drizzle.png";
