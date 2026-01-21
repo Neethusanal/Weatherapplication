@@ -21,21 +21,22 @@ function showLoading() {
 }
 
 
+
 async function getWeather(city) {
     showLoading();
     try {
         const response = await fetch(`${apiUrl}${city}&units=metric&appid=${apiKey}`);
-        
         if (!response.ok) throw new Error("City not found");
 
         const data = await response.json();
-        console.log(data,"data from api")
+         console.log(data,"data from api")
         updateUI(data);
+        getForecast(city); 
 
-        // Save user preference
         localStorage.setItem("lastCity", city);
     } catch (error) {
         showError(error.message);
+        forecastContainer.innerHTML = ""; 
     }
 }
 
@@ -91,3 +92,50 @@ window.addEventListener("load", () => {
         searchInput.value = lastCity;
     }
 });
+
+const forecastUrl = "https://api.openweathermap.org/data/2.5/forecast?q=";
+const forecastContainer = document.querySelector(".forecast-cards");
+
+
+async function getForecast(city) {
+    try {
+        const response = await fetch(`${forecastUrl}${city}&units=metric&appid=${apiKey}`);
+        if (!response.ok) throw new Error("Forecast not found");
+
+        const data = await response.json();
+        updateForecast(data);
+    } catch (error) {
+        forecastContainer.innerHTML = `<p style="color:red">${error.message}</p>`;
+    }
+}
+
+
+function updateForecast(data) {
+    forecastContainer.innerHTML = "";
+
+  
+    const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+    dailyData.forEach(day => {
+        const date = new Date(day.dt_txt);
+        const options = { weekday: "short" };
+        const dayName = new Intl.DateTimeFormat("en-US", options).format(date);
+
+        const weather = day.weather[0].main.toLowerCase();
+        let icon = "cloud.png";
+        if (weather.includes("rain")) icon = "rain.png";
+        else if (weather.includes("clear")) icon = "clear.png";
+        else if (weather.includes("snow")) icon = "snow.png";
+        else if (weather.includes("cloud")) icon = "cloud.png";
+        else if (weather.includes("storm")) icon = "storm.png";
+
+        const card = document.createElement("div");
+        card.classList.add("forecast-card");
+        card.innerHTML = `
+            <p>${dayName}</p>
+            <img src="images/${icon}" alt="${weather}">
+            <p>${Math.round(day.main.temp)}°C</p>
+        `;
+        forecastContainer.appendChild(card);
+    });
+}
